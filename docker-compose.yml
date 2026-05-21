@@ -1,0 +1,43 @@
+version: '3.9'
+
+services:
+
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile.api
+    ports:
+      - '8000:8000'
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY}
+      - GOOGLE_CSE_ID=${GOOGLE_CSE_ID}
+      - DATABASE_URL=postgresql://gvsu:gvsu@db:5432/gvsu_chatbot
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - '80:80'
+    depends_on:
+      - api
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER:     gvsu
+      POSTGRES_PASSWORD: gvsu
+      POSTGRES_DB:       gvsu_chatbot
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U gvsu']
+      interval: 5s
+      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+volumes:
+  postgres_data:
