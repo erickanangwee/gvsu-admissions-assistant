@@ -44,8 +44,12 @@ def _google_search(query: str) -> list[dict]:
     }
     try:
         resp = httpx.get(GOOGLE_SEARCH_URL, params=params, timeout=10)
-        resp.raise_for_status()
+        if not resp.is_success:
+            log.error(f'Google Search API {resp.status_code}: {resp.text}')
+            return []
         data = resp.json()
+        if 'error' in data:
+            log.error(f'Google Search API error body: {data["error"]}')
         return data.get('items', [])
     except Exception as e:
         log.error(f'Google Search API error: {e}')
