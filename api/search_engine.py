@@ -11,7 +11,7 @@ from dataclasses import dataclass
 import httpx
 from bs4 import BeautifulSoup
 from config import (
-    GOOGLE_API_KEY, GOOGLE_CSE_ID, GOOGLE_SEARCH_URL,
+    SERPER_API_KEY, SERPER_SEARCH_URL,
     MAX_SEARCH_RESULTS, MAX_PAGE_CHARS, SEARCH_SITE
 )
 
@@ -29,30 +29,24 @@ class SearchPassage:
     snippet: str   # Google's own snippet for quick context
 
 
-def _google_search(query: str) -> list[dict]:
+def _serper_search(query: str) -> list[dict]:
     """
-    Call the Google Custom Search API.
+    Call the Serper Google Search API.
     Returns a list of result dicts with keys: title, link, snippet.
     """
-    params = {
-        'key': GOOGLE_API_KEY,
-        'cx':  GOOGLE_CSE_ID,
-        'q':   query,
-        'num': MAX_SEARCH_RESULTS,
-        'siteSearch': SEARCH_SITE,
-        'siteSearchFilter': 'i',   # include only this site
-    }
     try:
-        resp = httpx.get(GOOGLE_SEARCH_URL, params=params, timeout=10)
+        resp = httpx.post(
+            SERPER_SEARCH_URL,
+            headers={'X-API-KEY': SERPER_API_KEY, 'Content-Type': 'application/json'},
+            json={'q': f'site:{SEARCH_SITE} {query}', 'num': MAX_SEARCH_RESULTS},
+            timeout=10,
+        )
         if not resp.is_success:
-            log.error(f'Google Search API {resp.status_code}: {resp.text}')
+            log.error(f'Serper API {resp.status_code}: {resp.text}')
             return []
-        data = resp.json()
-        if 'error' in data:
-            log.error(f'Google Search API error body: {data["error"]}')
-        return data.get('items', [])
+        return resp.json().get('organic', [])
     except Exception as e:
-        log.error(f'Google Search API error: {e}')
+        log.error(f'Serper API error: {e}')
         return []
 
 
@@ -92,9 +86,9 @@ def search_and_fetch(query: str) -> list[SearchPassage]:
     2. Fetches each result page and extracts clean text
     3. Returns a list of SearchPassage objects (or empty list on failure)
     """
-    results = _google_search(query)
+    results = _serper_search(query)
     if not results:
-        log.warning(f'No Google results for query: {query}')
+        log.warning(f'No Serper results for query: {query}')
         return []
 
     passages = []

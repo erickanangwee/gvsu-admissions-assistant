@@ -1,5 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 const SESSION_ID  = uuidv4();
 const API_BASE    = 'http://localhost:8000/api/v1';
@@ -63,7 +65,10 @@ function Message({ msg }) {
         fontSize: '14px',
         lineHeight: '1.55',
       }}>
-        <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{msg.content}</p>
+        {isUser
+          ? <p style={{ margin: 0, whiteSpace: 'pre-wrap' }}>{msg.content}</p>
+          : <div className="md-body"><ReactMarkdown remarkPlugins={[remarkGfm]}>{msg.content}</ReactMarkdown></div>
+        }
 
         {!isUser && msg.pages_fetched > 0 && (
           <div style={{
@@ -190,6 +195,20 @@ export default function App() {
         input:focus { outline: none; box-shadow: 0 0 0 2px #1B4F8A44; }
         ::-webkit-scrollbar { width: 5px; }
         ::-webkit-scrollbar-thumb { background: #CBD5E1; border-radius: 4px; }
+        .md-body { font-size: 14px; line-height: 1.6; color: #1a1a1a; }
+        .md-body p { margin: 0 0 8px 0; }
+        .md-body p:last-child { margin-bottom: 0; }
+        .md-body h1, .md-body h2, .md-body h3 { color: #1B4F8A; margin: 12px 0 6px 0; font-size: 14px; font-weight: 700; }
+        .md-body h1 { font-size: 15px; }
+        .md-body ul, .md-body ol { margin: 4px 0 8px 0; padding-left: 20px; }
+        .md-body li { margin-bottom: 3px; }
+        .md-body strong { color: #1a1a1a; font-weight: 600; }
+        .md-body hr { border: none; border-top: 1px solid #E2EAF4; margin: 10px 0; }
+        .md-body table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 13px; }
+        .md-body th { background: #E8F0F9; color: #1B4F8A; padding: 6px 10px; text-align: left; border: 1px solid #B5D4F4; }
+        .md-body td { padding: 5px 10px; border: 1px solid #D8E6F5; }
+        .md-body tr:nth-child(even) td { background: #F4F7FB; }
+        .md-body blockquote { border-left: 3px solid #FFC72C; margin: 8px 0; padding: 4px 12px; background: #FFFBF0; color: #5a4a00; border-radius: 0 6px 6px 0; }
       `}</style>
 
       {/* Header */}

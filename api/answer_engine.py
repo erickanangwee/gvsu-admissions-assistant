@@ -24,8 +24,7 @@ Rules:
 - If the provided content does not contain enough information to answer, say:
   "I couldn't find a clear answer on gvsu.edu for that. Please contact GVSU
   Admissions directly at admissions@gvsu.edu or call 616-331-2025."
-- Always end your response with a "Sources:" section listing the page title
-  and URL for each source you used.
+- Do NOT include a Sources section — sources are shown separately in the UI.
 """
 
 
