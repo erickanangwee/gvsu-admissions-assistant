@@ -25,6 +25,7 @@ Rules:
   "I couldn't find a clear answer on gvsu.edu for that. Please contact GVSU
   Admissions directly at admissions@gvsu.edu or call 616-331-2025."
 - Do NOT include a Sources section — sources are shown separately in the UI.
+- Do NOT use emojis in your responses.
 """
 
 
@@ -53,23 +54,22 @@ def generate_answer(
     query: str,
     passages: list[SearchPassage],
     history: list[dict],
+    topic: str | None = None,
 ) -> str:
     """Call Claude with the assembled context and conversation history."""
     context = build_context_block(passages)
 
     messages = []
 
-    # Add prior conversation turns (capped)
     for turn in history[-MAX_CONVERSATION_TURNS:]:
-        messages.append({
-            "role":    turn["role"],
-            "content": turn["content"],
-        })
+        messages.append({"role": turn["role"], "content": turn["content"]})
 
-    # Add current question with live page content
+    topic_note = f"The user has indicated they are interested in the **{topic}** category. Tailor your answer accordingly.\n\n" if topic else ""
+
     messages.append({
         "role": "user",
         "content": (
+            f"{topic_note}"
             f"Here are the relevant GVSU web pages I found for your question:\n\n"
             f"{context}\n\n"
             f"Question: {query}"
@@ -85,11 +85,13 @@ def generate_answer(
     return response.content[0].text
 
 
-def answer(query: str, history: list[dict]) -> AnswerResponse:
+def answer(query: str, history: list[dict], topic: str | None = None) -> AnswerResponse:
     """
     Full pipeline: search gvsu.edu → fetch pages → generate answer.
+    Topic (if set) is prepended to the search query and passed to Claude.
     """
-    passages = search_and_fetch(query)
+    search_query = f"{topic} {query}" if topic else query
+    passages = search_and_fetch(search_query)
 
     if not passages:
         return AnswerResponse(
@@ -103,7 +105,7 @@ def answer(query: str, history: list[dict]) -> AnswerResponse:
             fallback=True,
         )
 
-    answer_text = generate_answer(query, passages, history)
+    answer_text = generate_answer(query, passages, history, topic)
 
     sources = [
         {"title": p.title, "url": p.url}

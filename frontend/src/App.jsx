@@ -5,7 +5,7 @@ import remarkGfm from 'remark-gfm';
 
 const SESSION_ID  = uuidv4();
 const API_BASE    = 'http://localhost:8000/api/v1';
-const TOPIC_CHIPS = ['Freshman', 'Transfer', 'Graduate', 'Financial Aid', 'Housing'];
+const TOPIC_CHIPS = ['Freshman', 'Transfer', 'Graduate', 'International', 'Financial Aid', 'Housing'];
 
 // GVSU brand colors
 const GVSU_NAVY  = '#1B4F8A';
@@ -128,7 +128,7 @@ function SearchingIndicator() {
 export default function App() {
   const [messages,  setMessages]  = useState([{
     role: 'assistant',
-    content: 'Hi! I can answer questions about GVSU admissions, deadlines, financial aid, housing, and more. I search gvsu.edu live to give you the most up-to-date answers.',
+    content: 'Hello. I can assist you with any GVSU admissions questions. I search gvsu.edu live to give you the most up-to-date answers.',
     sources: [],
     pages_fetched: 0,
   }]);
@@ -220,7 +220,7 @@ export default function App() {
       }}>
         <div style={{
           width: '36px', height: '36px', borderRadius: '8px',
-          background: GVSU_GOLD, display: 'flex', alignItems: 'center',
+          background: '#fff', display: 'flex', alignItems: 'center',
           justifyContent: 'center', fontWeight: '800', fontSize: '18px', color: GVSU_NAVY,
         }}>G</div>
         <div style={{ flex: 1 }}>

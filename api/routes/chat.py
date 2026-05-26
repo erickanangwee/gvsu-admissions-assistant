@@ -16,7 +16,7 @@ def chat(req: ChatRequest, db: Session = Depends(get_db)):
     t0      = time.time()
     history = [{'role': t.role, 'content': t.content} for t in req.history]
 
-    result     = answer_engine.answer(req.message, history)
+    result     = answer_engine.answer(req.message, history, req.topic)
     latency_ms = (time.time() - t0) * 1000
 
     db.add(QueryLog(
